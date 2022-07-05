@@ -32,7 +32,27 @@ class Grid:
         return self.current_cell is None
 
 
-    def move_current_cell(self):
+    def move_current_cell_left(self):
+        # Move the cell left one column
+        current_col = self.current_cell[0]
+        current_row = self.current_cell[1]
+        the_cell = self.cells[current_col][current_row]
+        self.cells[current_col][current_row] = None
+        self.current_cell[0] = max(0, self.current_cell[0] - 1)
+        self.cells[self.current_cell[0]][self.current_cell[1]] = the_cell
+
+
+    def move_current_cell_right(self):
+        # Move the cell right one column
+        current_col = self.current_cell[0]
+        current_row = self.current_cell[1]
+        the_cell = self.cells[current_col][current_row]
+        self.cells[current_col][current_row] = None
+        self.current_cell[0] = min(9, self.current_cell[0] + 1)
+        self.cells[self.current_cell[0]][self.current_cell[1]] = the_cell
+
+
+    def move_current_cell_down(self):
         # See if the spot directly under the current cell is occupied
         current_col = self.current_cell[0]
         current_row = self.current_cell[1]
