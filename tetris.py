@@ -38,7 +38,7 @@ def main () :
         sys.exit()
 
     if grid.new_cell_needed():
-        grid.add_cell()
+        grid.add_shape()
         last_update_time = pygame.time.get_ticks()
 
     keyPresses = pygame.key.get_pressed()
