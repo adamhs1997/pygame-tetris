@@ -170,8 +170,21 @@ class Grid:
 
 
     def clear_completed_rows(self):
-        for idx, row in enumerate(self.cells):
-            if all(lambda cell: cell is not None for cell in row):
-                for i in range(len(row)):
-                    row[i] = None
-                self.cells[idx] = row
+        # Shapes can only be cleared when the last shape is at the bottom
+        #  i.e., when a new shape is needed
+        if not self.new_cell_needed():
+            return
+            
+        for row_num in range(22):
+            # If the same row in every column is filled, it should be cleared
+            if all(list(col[row_num] is not None for col in self.cells)):
+                for col_num in range(len(self.cells)):
+                    # Clear the row
+                    self.cells[col_num][row_num] = None
+
+                    # Move down all the cells above the cleared row in the column
+                    # Move down to up so we don't overwrite cells
+                    for upper_row_num in list(reversed(range(row_num))):
+                        cell = self.cells[col_num][upper_row_num]
+                        self.cells[col_num][upper_row_num] = None
+                        self.cells[col_num][upper_row_num + 1] = cell

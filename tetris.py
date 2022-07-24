@@ -61,6 +61,9 @@ def main () :
     if (current_time - last_update_time > update_time_interval):
         grid.move_current_cell_down()
         last_update_time = current_time
+
+    # Clear any completed rows
+    grid.clear_completed_rows()
  
     # Render elements of the game
     WINDOW.fill(BACKGROUND)
