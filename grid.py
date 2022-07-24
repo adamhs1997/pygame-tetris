@@ -1,5 +1,4 @@
 import random
-from turtle import st
 
 import pygame
 
@@ -65,23 +64,67 @@ class Grid:
 
 
     def move_current_cell_left(self):
-        # Move the cell left one column
-        current_col = self.current_shape[0]
-        current_row = self.current_shape[1]
-        the_cell = self.cells[current_col][current_row]
-        self.cells[current_col][current_row] = None
-        self.current_shape[0] = max(0, self.current_shape[0] - 1)
-        self.cells[self.current_shape[0]][self.current_shape[1]] = the_cell
+        # Check that each cell can be moved left
+        for current_cell in self.current_shape:
+            current_col = current_cell[0]
+            current_row = current_cell[1]
 
+            # Check that the shape isn't at the left side
+            if current_col == 0:
+                return
+
+            # Check to see if the next cell is occupied AND make sure
+            #  that cell isn't part of this shape
+            if self.cells[current_col - 1][current_row] is not None\
+                and [current_col - 1, current_row] not in self.current_shape:
+                # Occupied, we're done
+                return
+
+        # Sort the shape so we move the left side first
+        # This prevents me from overwriting cells that were already moved
+        self.current_shape.sort(key=lambda cell: cell[0])
+
+        # Update the current shape
+        for i, current_cell in enumerate(self.current_shape):
+            # Move the cell over left
+            current_col = current_cell[0]
+            current_row = current_cell[1]
+            the_cell = self.cells[current_col][current_row]
+            self.cells[current_col][current_row] = None
+            self.current_shape[i][0] = current_col - 1
+            self.cells[self.current_shape[i][0]][self.current_shape[i][1]] = the_cell
+            
 
     def move_current_cell_right(self):
-        # Move the cell right one column
-        current_col = self.current_shape[0]
-        current_row = self.current_shape[1]
-        the_cell = self.cells[current_col][current_row]
-        self.cells[current_col][current_row] = None
-        self.current_shape[0] = min(9, self.current_shape[0] + 1)
-        self.cells[self.current_shape[0]][self.current_shape[1]] = the_cell
+        # Check that each cell can be moved right
+        for current_cell in self.current_shape:
+            current_col = current_cell[0]
+            current_row = current_cell[1]
+
+            # Check that the shape isn't at the right side
+            if current_col == 9:
+                return
+
+            # Check to see if the next cell is occupied AND make sure
+            #  that cell isn't part of this shape
+            if self.cells[current_col + 1][current_row] is not None\
+                and [current_col + 1, current_row] not in self.current_shape:
+                # Occupied, we're done
+                return
+
+        # Sort the shape so we move the right side first
+        # This prevents me from overwriting cells that were already moved
+        self.current_shape.sort(reverse = True, key=lambda cell: cell[0])
+
+        # Update the current shape
+        for i, current_cell in enumerate(self.current_shape):
+            # Move the cell over right
+            current_col = current_cell[0]
+            current_row = current_cell[1]
+            the_cell = self.cells[current_col][current_row]
+            self.cells[current_col][current_row] = None
+            self.current_shape[i][0] = current_col + 1
+            self.cells[self.current_shape[i][0]][self.current_shape[i][1]] = the_cell
 
 
     def move_current_cell_down(self):
