@@ -398,13 +398,29 @@ class Grid:
         # else if 2 with same y, find common x, pick right as pivot (higher x)
         elif most_common_y[0][1] == 2 and most_common_y[1][1] == 2:
             shapes_copy.sort(key=lambda x: (x[1], -x[0]))
+            # Sometimes we have first and last flipped...
+            if self._point_distance(shapes_copy[0], shapes_copy[1]) >\
+                self._point_distance(shapes_copy[1], shapes_copy[3]):
+                far_point = shapes_copy[0]
+                shapes_copy[0] = shapes_copy[3]
+                shapes_copy[3] = far_point
         # else if 2 with same x, find common y, pick upper as pivot (lower y)
         elif most_common_x[0][1] == 2 and most_common_x[1][1] == 2:
             shapes_copy.sort(key=lambda x: (x[1], -x[0]))  # They're the same?!
+            # Sometimes we have first and last flipped...
+            if self._point_distance(shapes_copy[0], shapes_copy[1]) >\
+                self._point_distance(shapes_copy[1], shapes_copy[3]):
+                far_point = shapes_copy[0]
+                shapes_copy[0] = shapes_copy[3]
+                shapes_copy[3] = far_point
         else:
             exit(666)  # You're out of luck
 
         self.current_shape = shapes_copy
+
+
+    def _point_distance(self, point_a, point_b):
+        return ((point_a[1] - point_b[1])**2 + (point_a[0] - point_b[0])**2)**(1/2)
 
 
     def _point_available(self, x_value, y_value):
