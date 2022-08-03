@@ -27,6 +27,7 @@ def main () :
   lateral_update_time_interval = 300
   move_left = False
   move_right = False
+  rotate = False
   
   # The main game loop
   while looping :
@@ -46,6 +47,8 @@ def main () :
         move_right = True
     if (keyPresses[K_LEFT]):
         move_left = True
+    if (keyPresses[K_SPACE]):
+        rotate = True
         
     # Move the cell down one cell length every second (half second if down key held)
     update_time_interval = 500 if keyPresses[K_DOWN] else 1000
@@ -57,6 +60,9 @@ def main () :
         if move_left:
             grid.move_current_cell_left()
             move_left = False
+        if rotate:
+            grid.rotate_shape()
+            rotate = False
         lateral_last_update_time = current_time
     if (current_time - last_update_time > update_time_interval):
         grid.move_current_cell_down()

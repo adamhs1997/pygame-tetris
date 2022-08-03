@@ -1,3 +1,5 @@
+from collections import Counter
+from copy import deepcopy
 import random
 
 import pygame
@@ -174,7 +176,7 @@ class Grid:
         #  i.e., when a new shape is needed
         if not self.new_cell_needed():
             return
-            
+
         for row_num in range(22):
             # If the same row in every column is filled, it should be cleared
             if all(list(col[row_num] is not None for col in self.cells)):
@@ -188,3 +190,225 @@ class Grid:
                         cell = self.cells[col_num][upper_row_num]
                         self.cells[col_num][upper_row_num] = None
                         self.cells[col_num][upper_row_num + 1] = cell
+
+
+    def rotate_shape(self):
+        # Number the cells right to left, top to bottom
+        # Pivot on cell 2 (it stays in same place)
+        # two of the cells will be easy (since next to cell 2)
+        # Don't do anything if is a square
+        # Rotate clock-wise
+
+        # Find point p that touches two others (will always exist)
+        # Align points so that three are touching (p in the middle), last is two away
+
+        # Sort the shape so we go from top-to-bottom, right-to-left
+        # https://stackoverflow.com/a/17109098
+        self._align_shape_cells()
+
+        shape_copy = deepcopy(self.current_shape)
+
+        # TODO: Handle extra cases for 
+
+        # Trace the shape, determine where we need to move w.r.t. pivot
+        # Pivot (2) will be somewhere around us...
+        if shape_copy[1][1] > shape_copy[0][1]:  # Below
+            # Move cell (1) from top to the right
+            new_x = shape_copy[0][0] + 1
+            new_y = shape_copy[0][1] + 1
+            if self._point_available(new_x, new_y):
+                shape_copy[0][0] = new_x
+                shape_copy[0][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[1][0] < shape_copy[0][0]:  # Left
+            # Move cell (1) from right to below
+            new_x = shape_copy[0][0] - 1
+            new_y = shape_copy[0][1] + 1
+            if self._point_available(new_x, new_y):
+                shape_copy[0][0] = new_x
+                shape_copy[0][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[1][0] > shape_copy[0][0]:  #  Right
+            # Move cell (1) from left to above
+            new_x = shape_copy[0][0] + 1
+            new_y = shape_copy[0][1] - 1
+            if self._point_available(new_x, new_y):
+                shape_copy[0][0] = new_x
+                shape_copy[0][1] = new_y
+            else:
+                return  # Make no changes
+        else:  # Above
+            # Move cell (1) from below to left
+            new_x = shape_copy[0][0] - 1
+            new_y = shape_copy[0][1] - 1
+            if self._point_available(new_x, new_y):
+                shape_copy[0][0] = new_x
+                shape_copy[0][1] = new_y
+            else:
+                return  # Make no changes
+
+        # Do nothing to the pivot
+
+        # Point (3) will be near pivot (2)
+        if shape_copy[2][1] > shape_copy[1][1]:  # Below
+            # Move cell (3) from below to the left
+            new_x = shape_copy[2][0] - 1
+            new_y = shape_copy[2][1] - 1
+            if self._point_available(new_x, new_y):
+                shape_copy[2][0] = new_x
+                shape_copy[2][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[2][0] > shape_copy[1][0]:  # Right
+            # Move cell (3) from right to below
+            new_x = shape_copy[2][0] - 1
+            new_y = shape_copy[2][1] + 1
+            if self._point_available(new_x, new_y):
+                shape_copy[2][0] = new_x
+                shape_copy[2][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[2][0] < shape_copy[1][0]:  # Left
+            # Move cell (3) from left to above
+            new_x = shape_copy[2][0] + 1
+            new_y = shape_copy[2][1] - 1
+            if self._point_available(new_x, new_y):
+                shape_copy[2][0] = new_x
+                shape_copy[2][1] = new_y
+            else:
+                return  # Make no changes
+        else:  # Above
+            # Move cell (3) from above to right
+            new_x = shape_copy[2][0] + 1
+            new_y = shape_copy[2][1] + 1
+            if self._point_available(new_x, new_y):
+                shape_copy[2][0] = new_x
+                shape_copy[2][1] = new_y
+            else:
+                return  # Make no changes
+
+        # Cell (4) can be anywhere from pivot... corner to 2 or two blocks away
+        if shape_copy[3][0] > shape_copy[1][0] \
+            and shape_copy[3][1] == shape_copy[1][1]:  # Right of pivot by two blocks
+            # Move cell below by two blocks
+            new_x = shape_copy[3][0] - 2
+            new_y = shape_copy[3][1] + 2
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[3][0] < shape_copy[1][0] \
+            and shape_copy[3][1] == shape_copy[1][1]:  # Left of pivot by two blocks
+            # Move cell above by two blocks
+            new_x = shape_copy[3][0] + 2
+            new_y = shape_copy[3][1] - 2
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[3][1] > shape_copy[1][1] \
+            and shape_copy[3][0] == shape_copy[1][0]:  # Below pivot by two blocks
+            # Move cell to left by two blocks
+            new_x = shape_copy[3][0] - 2
+            new_y = shape_copy[3][1] - 2
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[3][1] < shape_copy[1][1] \
+            and shape_copy[3][0] == shape_copy[1][0]:  # Above pivot by two blocks
+            # Move cell to right by two blocks
+            new_x = shape_copy[3][0] + 2
+            new_y = shape_copy[3][1] + 2
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[3][1] < shape_copy[1][1] \
+            and shape_copy[3][0] < shape_copy[1][0]:  # Above and left of pivot
+            # Move cell to right by two blocks
+            new_x = shape_copy[3][0] + 2
+            new_y = shape_copy[3][1]
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[3][1] > shape_copy[1][1] \
+            and shape_copy[3][0] < shape_copy[1][0]:  # Below and left of pivot
+            # Move cell up by two blocks
+            new_x = shape_copy[3][0]
+            new_y = shape_copy[3][1] - 2
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[3][1] < shape_copy[1][1] \
+            and shape_copy[3][0] > shape_copy[1][0]:  # Above and right of pivot
+            # Move cell down by two blocks
+            new_x = shape_copy[3][0]
+            new_y = shape_copy[3][1] + 2
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+        elif shape_copy[3][1] > shape_copy[1][1] \
+            and shape_copy[3][0] > shape_copy[1][0]:  # Below and right of pivot
+            # Move cell left by two blocks
+            new_x = shape_copy[3][0] - 2
+            new_y = shape_copy[3][1]
+            if self._point_available(new_x, new_y):
+                shape_copy[3][0] = new_x
+                shape_copy[3][1] = new_y
+            else:
+                return  # Make no changes
+
+        # Reset shape on grid
+        shape_cells = []
+        for cell in self.current_shape:
+            shape_cells.append(self.cells[cell[0]][cell[1]])
+            self.cells[cell[0]][cell[1]] = None
+
+        for i, cell in enumerate(shape_copy):
+            self.cells[cell[0]][cell[1]] = shape_cells[i]
+
+        self.current_shape = shape_copy
+
+
+    def _align_shape_cells(self):
+        most_common_x = Counter([x[0] for x in self.current_shape]).most_common()
+        most_common_y = Counter([x[1] for x in self.current_shape]).most_common()
+
+        shapes_copy = deepcopy(self.current_shape)
+
+        # if 3+ with same y, sort by x, pick middle as pivot
+        if most_common_y[0][1] >= 3:
+            shapes_copy.sort(key=lambda x: (x[1] == most_common_y[0][0], x[0]), reverse=True)
+        # else if 3+ with same x, sort by y, pick middle as pivot
+        elif most_common_x[0][1] >= 3:
+            shapes_copy.sort(key=lambda x: (x[0] == most_common_x[0][0], x[1]), reverse=True)
+        # else if 2 with same y, find common x, pick right as pivot (higher x)
+        elif most_common_y[0][1] == 2 and most_common_y[1][1] == 2:
+            shapes_copy.sort(key=lambda x: (x[1], -x[0]))
+        # else if 2 with same x, find common y, pick upper as pivot (lower y)
+        elif most_common_x[0][1] == 2 and most_common_x[1][1] == 2:
+            shapes_copy.sort(key=lambda x: (x[1], -x[0]))  # They're the same?!
+        else:
+            exit(666)  # You're out of luck
+
+        self.current_shape = shapes_copy
+
+
+    def _point_available(self, x_value, y_value):
+        return 0 <= x_value <= 9 \
+            and 0 <= y_value <= 21 \
+            and (self.cells[x_value][y_value] is None \
+                or [x_value, y_value] in self.current_shape)
