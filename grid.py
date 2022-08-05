@@ -10,12 +10,15 @@ from cell import Cell
 class Grid:
     cells = []  # 10 columns x 22 rows (top 2 rows hidden)
     current_shape = None  # Tuple of indices for cell to move on updates, None if cell at bottom
+    score = 0
 
     def __init__(self):
         for i in range(10):
             self.cells.append([])
             for _ in range(22):
                 self.cells[i].append(None)
+
+        self.score_font = pygame.font.SysFont(None, 48)
 
 
     def generate_shape(self):
@@ -162,6 +165,7 @@ class Grid:
 
 
     def draw(self, window):
+        # Draw cells
         CELL_SIZE = 25
         for i, row in enumerate(self.cells):
             for j, cell in enumerate(row):
@@ -169,6 +173,14 @@ class Grid:
                     continue
                 rect = pygame.Rect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(window, cell.color, rect)
+
+        # Draw header
+        header = pygame.Rect(0, 0, 250, 50)
+        pygame.draw.rect(window, (0x1D, 0x82, 0x22), header)
+
+        # Draw score
+        score_text = self.score_font.render(f"Score: {self.score}", True, (255, 255, 255))
+        window.blit(score_text, (10, 10))
 
 
     def clear_completed_rows(self):
@@ -190,6 +202,9 @@ class Grid:
                         cell = self.cells[col_num][upper_row_num]
                         self.cells[col_num][upper_row_num] = None
                         self.cells[col_num][upper_row_num + 1] = cell
+
+                # Update score
+                self.score += 100
 
 
     def rotate_shape(self):
