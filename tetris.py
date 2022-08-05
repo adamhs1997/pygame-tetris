@@ -16,7 +16,7 @@ WINDOW_WIDTH = 250
 WINDOW_HEIGHT = 550
  
 WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption('My Game!')
+pygame.display.set_caption('The Tetris')
  
 # The main function that controls the game
 def main () :
@@ -37,6 +37,12 @@ def main () :
       if event.type == QUIT :
         pygame.quit()
         sys.exit()
+
+    if grid.is_game_over():
+        # No sense to really re-draw anymore
+        # Keep the game loop alive so the window isn't inactive
+        fpsClock.tick(FPS)
+        continue
 
     if grid.new_cell_needed():
         grid.add_shape()

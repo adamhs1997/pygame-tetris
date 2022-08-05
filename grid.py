@@ -11,6 +11,7 @@ class Grid:
     cells = []  # 10 columns x 22 rows (top 2 rows hidden)
     current_shape = None  # Tuple of indices for cell to move on updates, None if cell at bottom
     score = 0
+    game_over = False
 
     def __init__(self):
         for i in range(10):
@@ -52,11 +53,11 @@ class Grid:
 
 
     def add_shape(self):
-        # Add a cell in any empty spot in the first row
-        idx = random.randint(0, 9)
-        if self.cells[idx][0] is not None:
-            # TODO: You lose!
-            pass
+        # If there's any cell filled in in row 1 (second under header)
+        #  you lose
+        if any(map(lambda x: x[1] is not None, self.cells)):
+            self.game_over = True
+            return
         self.current_shape = self.generate_shape()
         valid_colors = [[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [255, 0, 255], [0, 255, 255]]
         color_tuple = random.choice(valid_colors)
@@ -66,6 +67,10 @@ class Grid:
     
     def new_cell_needed(self):
         return self.current_shape is None
+
+
+    def is_game_over(self):
+        return self.game_over
 
 
     def move_current_cell_left(self):
@@ -176,7 +181,10 @@ class Grid:
 
         # Draw header
         header = pygame.Rect(0, 0, 250, 50)
-        pygame.draw.rect(window, (0x1D, 0x82, 0x22), header)
+        if self.game_over:
+            pygame.draw.rect(window, (0xBD, 0x0F, 0x08), header)
+        else:
+            pygame.draw.rect(window, (0x1D, 0x82, 0x22), header)
 
         # Draw score
         score_text = self.score_font.render(f"Score: {self.score}", True, (255, 255, 255))
